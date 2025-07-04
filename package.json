@@ -1,0 +1,9 @@
+{
+  "name": "word-fetcher",
+  "version": "1.0.0",
+  "description": "Fetches dictionary definitions and examples for words",
+  "main": "word-fetcher.js",
+  "dependencies": {
+    "axios": "^1.6.2"
+  }
+} 
