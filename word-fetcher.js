@@ -66,26 +66,37 @@ async function loadProgress() {
 
 async function main() {
     try {
-        // Read and parse the JSON file
+        // Argumentos: start, end, output
+        const [,, startArg, endArg, outputFile] = process.argv;
+        const start = parseInt(startArg, 10) || 0;
+        const end = parseInt(endArg, 10) || 40000;
+        const output = outputFile || 'structured_words.json';
+
+        // Leer y parsear el archivo JSON
         const data = JSON.parse(await fs.readFile('LR.json', 'utf8'));
         const words = data.data.words;
-        
-        // Load existing progress
-        const structuredData = await loadProgress();
 
-        // Process each word with rate limiting
-        for (const [index, wordObj] of words.entries()) {
+        // Cargar progreso existente (si existe)
+        let structuredData = {};
+        try {
+            const existing = await fs.readFile(output, 'utf8');
+            structuredData = JSON.parse(existing);
+        } catch (e) {
+            structuredData = {};
+        }
+
+        // Procesar solo el rango indicado
+        for (let i = start; i < Math.min(end, words.length); i++) {
+            const wordObj = words[i];
             const word = wordObj.text;
-            
-            // Skip if word is already processed
+
             if (structuredData[word]) {
-                console.log(`\nSkipping already processed word: ${word} (${index + 1}/${words.length})`);
+                console.log(`\nSkipping already processed word: ${word} (${i + 1}/${words.length})`);
                 continue;
             }
 
-            console.log(`\nProcessing word: ${word} (${index + 1}/${words.length})`);
+            console.log(`\nProcessing word: ${word} (${i + 1}/${words.length})`);
 
-            // Initialize word data structure
             structuredData[word] = {
                 word: word,
                 definition: '',
@@ -95,29 +106,24 @@ async function main() {
                 example1: '',
                 example2: '',
                 example3: '',
-                frequency: getFrequencyRange(index)
+                frequency: getFrequencyRange(i)
             };
 
             // Fetch dictionary data
             const dictData = await fetchDictionaryData(word);
             if (dictData && dictData[0]) {
                 const entry = dictData[0];
-                
-                // Get phonetics (IPA)
                 if (entry.phonetic) {
                     structuredData[word].ipa = entry.phonetic;
                 } else if (entry.phonetics && entry.phonetics.length > 0) {
                     const phoneticText = entry.phonetics.find(p => p.text)?.text;
                     if (phoneticText) structuredData[word].ipa = phoneticText;
                 }
-
-                // Get first meaning
                 if (entry.meanings && entry.meanings[0]) {
                     const meaning = entry.meanings[0];
                     structuredData[word].partOfSpeech = meaning.partOfSpeech || '';
                     if (meaning.definitions && meaning.definitions[0]) {
                         structuredData[word].definition = meaning.definitions[0].definition;
-                        // If the API provides any grammar info
                         if (meaning.definitions[0].grammar) {
                             structuredData[word].grammar = meaning.definitions[0].grammar;
                         }
@@ -134,18 +140,21 @@ async function main() {
                 if (sentences[2]) structuredData[word].example3 = sentences[2].sentence;
             }
 
-            // Save progress after each word
-            await saveProgress(structuredData);
+            // Guardar progreso en el archivo de salida
+            try {
+                await fs.writeFile(output, JSON.stringify(structuredData, null, 2));
+            } catch (error) {
+                console.error('Error saving progress:', error.message);
+            }
 
-            // Add a delay to avoid rate limiting
             await delay(1000);
         }
 
-        console.log('\nAll words have been processed and saved to structured_words.json');
+        console.log(`\nWords processed and saved to ${output}`);
 
     } catch (error) {
         console.error('Error:', error.message);
     }
 }
 
-main(); 
+main();
