@@ -10,7 +10,7 @@ Code
 
 #html:true
 
-#notetype:COCA-English
+#notetype:JPCARDSDE
 
 #deck column:1
 
