@@ -32,7 +32,7 @@ function cleanText(text) {
 // CSV Header
 const csvHeader = `#separator:comma
 #html:true
-#notetype:COCA-English
+#notetype:JPCARDSDE
 #deck column:1
 #tags column:13
 LR::Level,Word,UUID,UID,Part of Speech,Grammar,Pronunciation/IPA,Audio Link,Definition,Example 1,Example 2,Example 3,Tags`;
