@@ -147,7 +147,13 @@ async function fetchLiteraryExamples(slug) {
         
         return new Promise((resolve, reject) => {
             const headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en-GB;q=0.9,en;q=0.8',
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                'Pragma': 'no-cache',
+                'Cookie': `csrftoken=${CSRF_TOKEN}; sessionid=${SESSION_ID}; dictionary_dict_from=deu; dictionary_dict_to=deu`
             };
             
             https.get(url, { headers }, (res) => {
@@ -155,12 +161,9 @@ async function fetchLiteraryExamples(slug) {
                 if (res.statusCode === 301 || res.statusCode === 302) {
                     let redirectUrl = res.headers.location;
                     if (redirectUrl) {
-                        if (redirectUrl.startsWith('/')) {
+                        // Convertir URL relativa a absoluta
+                        if (!redirectUrl.startsWith('http')) {
                             redirectUrl = `https://speak.tatar${redirectUrl}`;
-                        }
-                        // Preservar parámetros si la URL redirigida no los tiene
-                        if (!redirectUrl.includes('?')) {
-                            redirectUrl += `?from=deu&to=deu&slug=${encodeURIComponent(slug)}&title-org=${encodeURIComponent(slug)}&p=1`;
                         }
                         https.get(redirectUrl, { headers }, (res2) => {
                             let data = '';

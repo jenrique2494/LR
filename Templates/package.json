@@ -1,0 +1,14 @@
+{
+  "name": "english-profile-vocabulary-reorganizer",
+  "version": "1.0.0",
+  "main": "reorganize_vocabulary.js",
+  "scripts": {
+    "start": "node reorganize_vocabulary.js",
+    "reorganize": "node reorganize_vocabulary.js"
+  },
+  "keywords": ["vocabulary", "anki", "english", "reorganize"],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "description": "Script para reorganizar el archivo English Profile Vocabulary según el formato especificado"
+}
